@@ -3,7 +3,14 @@ const palettes=[['#70aaa2','#a07dc2','#809e67','#6689df','#de6861'],['#4c8cba','
 export const patternFamilies=['ribbon','layers','rings','mosaic','petals'];
 const families=patternFamilies;
 export const patternKey=p=>JSON.stringify([p.family,p.colors,p.detail]);
-export function makePatternRound(difficulty,family){const count=difficulty==='easy'?6:difficulty==='hard'?12:9;const target={family:family||families[rand(families.length)],colors:shuffle(palettes[rand(palettes.length)]),detail:rand(2),rotation:0};const answerSet=new Set(shuffle(Array.from({length:count},(_,i)=>i)).slice(0,difficulty==='hard'?3:2));const items=Array.from({length:count},(_,i)=>{const p={...target,colors:[...target.colors],rotation:(i*47+rand(25))%360};if(!answerSet.has(i)){if(i%3===0)p.detail=1-p.detail;else{const a=rand(4),b=a+1;[p.colors[a],p.colors[b]]=[p.colors[b],p.colors[a]];if(difficulty==='hard'&&i%2===0)p.detail=1-p.detail;}}return p;});return {target,items,answers:[...answerSet].sort((a,b)=>a-b)};}
+export function makePatternRound(difficulty,family){const count=difficulty==='easy'?6:difficulty==='hard'?12:9;const target={family:family||families[rand(families.length)],colors:shuffle(palettes[rand(palettes.length)]),detail:rand(2),rotation:0};const answerSet=new Set(shuffle(Array.from({length:count},(_,i)=>i)).slice(0,difficulty==='hard'?3:2));const variants=[];
+ for(let a=0;a<5;a++)for(let b=a+1;b<5;b++)for(let detail=0;detail<2;detail++){
+  const colors=[...target.colors];[colors[a],colors[b]]=[colors[b],colors[a]];
+  variants.push({...target,colors,detail});
+ }
+ const distractors=shuffle(variants);
+ const items=Array.from({length:count},(_,i)=>({...(answerSet.has(i)?target:distractors.pop()),rotation:(i*47+rand(25))%360}));
+ return {target,items,answers:[...answerSet].sort((a,b)=>a-b)};}
 export function renderPattern(p){const c=p.colors;let body='';if(p.family==='ribbon'){
  const vertices=[[8,91],[24,68],[34,87],[44,43],[56,78],[70,17],[80,64],[108,86]];
  const facets=[[0,1,2],[1,2,3],[2,3,4],[3,4,5],[4,5,6],[5,6,7]];
