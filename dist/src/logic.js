@@ -1,6 +1,15 @@
 export const rand=(max,random=Math.random)=>Math.floor(random()*max);
 export function shuffle(values,random=Math.random){const a=[...values];for(let i=a.length-1;i>0;i--){const j=rand(i+1,random);[a[i],a[j]]=[a[j],a[i]];}return a;}
-export function makeNumberRound(difficulty,random=Math.random){const count=difficulty==='easy'?6:9;const numbers=Array.from({length:count},()=>1+rand(difficulty==='hard'?25:12,random));const solution=shuffle(Array.from({length:count},(_,i)=>i),random).slice(0,difficulty==='hard'?3:2);return {numbers,solution,target:solution.reduce((sum,i)=>sum+numbers[i],0)};}
+export function makeNumberRound(difficulty,random=Math.random,level=0){
+ const tier=difficulty==='hard'?2:difficulty==='easy'?0:1;
+ const stage=Math.max(0,Math.min(3,Math.floor(level)));
+ const count=[9,12,16][tier],required=Math.min(5,3+(tier===2?1:0)+Math.floor(stage/2));
+ const minimum=[2,8,15][tier],range=[24,52,85][tier]+stage*8;
+ const numbers=shuffle(Array.from({length:range},(_,i)=>minimum+i),random).slice(0,count);
+ const solution=shuffle(Array.from({length:count},(_,i)=>i),random).slice(0,required);
+ return {numbers,solution,required,level:stage+1,target:solution.reduce((sum,i)=>sum+numbers[i],0)};
+}
+export function checkNumberSelection(round,indices){return indices.length===round.required&&new Set(indices).size===indices.length&&indices.every(i=>Number.isInteger(i)&&i>=0&&i<round.numbers.length)&&indices.reduce((sum,i)=>sum+round.numbers[i],0)===round.target;}
 export const makeSequence=(length,alphabet,random=Math.random)=>Array.from({length},()=>alphabet[rand(alphabet.length,random)]);
 export const checkSequence=(expected,actual)=>expected.length===actual.length&&expected.every((v,i)=>v===actual[i]);
 export const isSolvedPuzzle=tiles=>tiles.every((t,i)=>t===i);
